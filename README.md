@@ -6,7 +6,7 @@ In `human/droppedaneuralnet_noah.ipynb`, I have my direct human solution where I
 
 The other half of this repo is an automated research agent (`agent.py`, `agent_core.py`, `agent_actions.py`, `evaluate.py`) that runs iterative solver experiments, logs outcomes, and keeps trying to improve the permutation.
 
-The narrative below is the agent's process from its full run, where I let it go until I ran out of free API credits.
+The narrative below is the agent's process from its full run, where I let it go until I ran out of free API credits. At the end I give an analysis of what could have been done better if I were to do it again. 
 
 ---
 
@@ -41,10 +41,7 @@ At iter 1 it attempted a baseline solver and immediately hit a practical bug:
 
 - treated loaded `.pth` objects as tensors, but they were `OrderedDict` state dicts.
 
-At iter 2 it fixed that and got:
-
-- **ACCEPTED**
-- **MSE: 0.52010363**
+At iter 2 it fixed that and got MSE of 0.52010363
 
 This was the strongest concrete success in the whole run unfortunately.
 
@@ -81,18 +78,7 @@ with many pivots (hill climbing, annealing variants, structure assumptions), but
 
 ## Stage 4: Mid-run conceptual correction (iter ~41-57)
 
-This stage had the agent develop an interesting few insights.
-
-The agent eventually rejected an incorrect “forced pairing by hidden dimensions” line of thought and re-centered on:
-
-- true 48x48 pairing ambiguity,
-- plus ordering problem.
-
-In synthesis, it explicitly documented:
-
-- all residual hidden dims were effectively the same structural size for pairing purposes,
-- last layer identity was stable,
-- search space was pairing + ordering, not trivial matching.
+This stage had the agent finally realize that search space was pairing + ordering, not trivial matching.
 
 While a useful realization and central to finding the solution (at least how I did it in my own solution), several difficult barriers remained that the agent was not able to overcome.
 
@@ -141,6 +127,8 @@ It found at least one concrete bug class:
 - list preallocation / indexing issues in piece loading (`list assignment index out of range` style failure).
 
 However before its full investigation finished, the api credits ran out and the script terminated.
+
 ---
+## Final thoughts and future improvements
 
 Setting up this research agent, it quickly became a kitchen sink of various ideas I had and I think it suffered for that. If I were to do it again, I would simplify things with a centralized context file that is modified in a controlled way alongside the research log itself, with no other bloat. Moreover, I would make the script evolutionary where if a new script is being written it uses the old one as a template, such that once the interaction layer and boilerplate python is established there won't be repeated errors as it tries to re-invent the wheel every single time. Perhaps adding an overarching orchestration agent, with multiple instances of the sub-investigation agents would have let to better outcomes, with each agent specializing in a different aspect (like one focusing on theoretical decompositions, etc). Anyway, research agents are very exciting, and theres much that can be done!
